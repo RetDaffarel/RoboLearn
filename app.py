@@ -35,11 +35,27 @@ load_dotenv()
 
 # ─────────────────────────────────────────────────────────────
 # Firebase initialisation
+#
+# Local dev: reads the serviceAccountKey.json file at FIREBASE_CRED_PATH.
+# Vercel (or any host with an ephemeral/read-only filesystem): set the
+# FIREBASE_CREDENTIALS_B64 environment variable instead — base64-encode
+# the whole serviceAccountKey.json content and paste it as one env var
+# in the Vercel dashboard. Never commit the raw JSON file.
+#
+#   macOS/Linux:  base64 -i serviceAccountKey.json | pbcopy
+#   Windows:      certutil -encode serviceAccountKey.json tmp.b64
 # ─────────────────────────────────────────────────────────────
+import base64
+
+FIREBASE_CREDENTIALS_B64 = os.getenv("FIREBASE_CREDENTIALS_B64")
 FIREBASE_CRED_PATH = os.getenv("FIREBASE_CRED_PATH", "./serviceAccountKey.json")
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate(FIREBASE_CRED_PATH)
+    if FIREBASE_CREDENTIALS_B64:
+        cred_dict = json.loads(base64.b64decode(FIREBASE_CREDENTIALS_B64))
+        cred = credentials.Certificate(cred_dict)
+    else:
+        cred = credentials.Certificate(FIREBASE_CRED_PATH)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
