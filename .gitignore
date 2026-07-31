@@ -1,0 +1,40 @@
+# --- Secrets & credentials (JANGAN pernah commit ini) ---
+.env
+.env.*
+serviceAccountKey.json
+*serviceAccountKey*.json
+
+# --- Bubblewrap / TWA signing key (JANGAN pernah commit ini) ---
+# Kalau file ini hilang/bocor, kamu tidak bisa lagi update APK yang sama di Play Store
+*.keystore
+*.jks
+android.keystore
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+pip-log.txt
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+
+# --- Node (jika nanti pakai tooling frontend) ---
+node_modules/
+
+# --- Vercel CLI local cache ---
+.vercel/

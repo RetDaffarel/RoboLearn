@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{main.py,bootstrap_admin.py,Connection_Port.py,Port_ESP-32.txt,robolearn_check/**}"
+    }
+  }
+}

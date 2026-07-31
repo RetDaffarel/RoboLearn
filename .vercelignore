@@ -1,0 +1,11 @@
+main.py
+bootstrap_admin.py
+Connection_Port.py
+Port_ESP-32.txt
+.env
+.env.*
+serviceAccountKey.json
+__pycache__/
+*.pyc
+.venv/
+venv/
