@@ -981,13 +981,12 @@ function switchPage(pageName) {
     document.getElementById(elId).classList.toggle('hidden', pageToElId[resolvedPage] !== elId);
   });
 
-  // Home/Learn/dashboards only need the logo — BLE/Run/AI are editor-only.
-  document.getElementById('topbar').classList.toggle('topbar-minimal', ['home', 'learn', 'guru', 'admin'].includes(resolvedPage));
-  // Build has its OWN "Kirim ke Robot" button inside the page itself, and
-  // no AI Assessment (it's a scratch sensor test, not a gradeable project)
-  // — so hide the Code-specific controls there, but keep BLE connect and
-  // the user badge/logout reachable (still visible via topbar-left/right
-  // since topbar-minimal isn't applied here).
+  // Home/Learn(sensor docs)/Quest/dashboards only need the logo — BLE/Run/AI
+  // are editor-only (Code page). 'build' added here on request — this page
+  // is just sensor documentation/testing, not something that sends to the
+  // robot, so there's no actual use for a BLE connect button here either.
+  document.getElementById('topbar').classList.toggle('topbar-minimal', ['home', 'build', 'learn', 'guru', 'admin'].includes(resolvedPage));
+  // Code page only: Run / AI Assessment controls.
   const codeOnly = ['run-btn', 'ai-toggle-btn'];
   codeOnly.forEach(id => {
     const el = document.getElementById(id);
@@ -1701,8 +1700,12 @@ function renderBuildPalette() {
   const list = document.getElementById('build-palette-list');
   list.innerHTML = '';
 
-  // Enable horizontal swipe on touch devices
-  list.style.touchAction = 'pan-x';
+  // Scroll direction (vertical in portrait, horizontal in landscape) is
+  // already controlled by the CSS overflow-x/overflow-y rules per
+  // breakpoint — no need to hardcode a pan direction here. The previous
+  // `touchAction = 'pan-x'` was written for the landscape row layout but
+  // applied unconditionally, which silently blocked vertical scrolling
+  // in portrait (this list's default stacked layout).
   list.style.webkitOverflowScrolling = 'touch';
 
   // Track touch start to distinguish tap vs swipe
