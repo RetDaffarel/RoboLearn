@@ -1779,7 +1779,7 @@ function renderSensorInfoBody() {
              style="max-width:100%;max-height:220px;border-radius:10px;object-fit:contain;"
              onerror="handleSensorPhotoError(this)" />
       </div>
-      <p style="text-align:center;font-style:italic;">Foto modul — kalau belum ada, tampil diagram ilustrasi sebagai gantinya.</p>`;
+      <p style="text-align:center;font-style:italic;">Foto modul ${data.title}</p>`;
   } else if (sensorInfoActiveTab === 'pin') {
     const rows = data.pins.map(p => `
       <tr>
@@ -2410,7 +2410,7 @@ function smUpdateConnStatus() {
   const pill = document.getElementById('sm-conn-status');
   const text = document.getElementById('sm-conn-text');
   pill.classList.toggle('online', bleConnected);
-  text.textContent = bleConnected ? 'Terhubung — menerima data' : 'Belum terhubung ke robot';
+  text.textContent = bleConnected ? 'Terhubung & menerima data' : 'Belum terhubung ke robot';
 }
 
 function smResetAndShowFor(hasUltrasonic, hasLine) {
