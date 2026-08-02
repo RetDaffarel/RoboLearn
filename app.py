@@ -109,14 +109,6 @@ async def serve_index():
     return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
 
-@app.get("/bluetooth.js")
-async def serve_bluetooth_js():
-    return FileResponse(
-        os.path.join(FRONTEND_DIR, "bluetooth.js"),
-        media_type="application/javascript",
-    )
-
-
 # ─────────────────────────────────────────────────────────────
 # PWA / TWA (Trusted Web Activity) support files
 # ─────────────────────────────────────────────────────────────
@@ -139,6 +131,22 @@ app.mount(
     "/models",
     StaticFiles(directory=os.path.join(FRONTEND_DIR, "models")),
     name="models",
+)
+# index.html was split into separate CSS/JS files (previously all inline)
+# so mobile-layout fixes are easier to locate and edit. bluetooth.js moved
+# from Front/bluetooth.js to Front/js/bluetooth.js alongside app.js, since
+# app.js's `import RoboBLE from './bluetooth.js'` resolves relative to
+# app.js's OWN url (/js/app.js) once it's an external module, not relative
+# to the page — so both files must live in the same folder.
+app.mount(
+    "/css",
+    StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")),
+    name="css",
+)
+app.mount(
+    "/js",
+    StaticFiles(directory=os.path.join(FRONTEND_DIR, "js")),
+    name="js",
 )
 
 @app.get("/.well-known/assetlinks.json")
