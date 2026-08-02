@@ -11,6 +11,18 @@ import {
   doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, where,
 } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
+/* True on phones/tablets — used to decide whether elements get the
+   native HTML5 draggable="true" attribute at all. Real bug this fixes:
+   on some touch browsers (notably Chrome Android), draggable="true"
+   makes the browser try to handle the gesture with its OWN (broken —
+   touch never fully fires native dragstart) drag machinery, which can
+   silently swallow the touch events before our custom touch-drag JS
+   (see attachTouchDrag below) ever sees them — the exact "literally no
+   reaction at all" symptom. Skipping the attribute entirely on touch
+   devices avoids that fight; desktop mouse dragging is unaffected. */
+const IS_TOUCH_DEVICE = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+
 /* ── Firebase init ──────────────────────────────────────────── */
 const firebaseConfig = {
   apiKey: "AIzaSyClJqYp8PsO8rik5TPCh-zWFGuR3ZjYZdk",
@@ -1536,7 +1548,7 @@ function renderPalette(cat) {
     const el = document.createElement('button');
     el.className = 'palette-block';
     el.style.background = block.color;
-    el.draggable = true;
+    el.draggable = !IS_TOUCH_DEVICE;
     el.innerHTML = `<div class="notch"></div>${block.label}`;
     el.dataset.blockType = block.type;
     el.dataset.blockParams = JSON.stringify(block.params);
@@ -1862,7 +1874,7 @@ function attachValueEditors(main, block) {
       if (e.key === 'Enter') { e.preventDefault(); span.blur(); }
     });
     span.addEventListener('blur', () => {
-      main.draggable = true;
+      main.draggable = !IS_TOUCH_DEVICE;
       const key = span.dataset.paramKey;
       if (!key) return;
       const raw = span.textContent.trim();
@@ -2085,7 +2097,7 @@ function renderBlock(block, ctx) {
   const shape = shapeOf(block.type);
 
   const main = document.createElement('div');
-  main.draggable = true;
+  main.draggable = !IS_TOUCH_DEVICE;
   main.className = 'program-block ' + (
     shape === 'hat' ? 'block-hat' :
     shape === 'end' ? 'block-end' :
