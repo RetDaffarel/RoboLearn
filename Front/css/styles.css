@@ -293,11 +293,6 @@ html, body {
   color: #fff;
   border: none;
   text-align: left;
-  /* Hands touch gestures on the block itself to the JS touch-drag system
-     (see attachTouchDrag in app.js) instead of the browser's default
-     scroll/pan — without this, touching a block to drag it would just
-     scroll the palette list instead. */
-  touch-action: none;
 }
 .palette-block:hover  { filter: brightness(1.15); }
 .palette-block:active { cursor: grabbing; transform: scale(.97); }
@@ -306,6 +301,20 @@ html, body {
   flex-shrink: 0; opacity: .7;
   background: rgba(255,255,255,.3);
 }
+/* Only the Code editor's palette (#palette-list) is drag-enabled — hand
+   touch gestures there to the JS touch-drag system (attachTouchDrag in
+   app.js) instead of the browser's default scroll/pan. Previously this
+   was on the base .palette-block rule, which also caught the Learn/Build
+   page's #build-palette-list (tap-only, no drag) and broke its ability
+   to be scrolled by touch entirely — that's the "tidak bisa scroll pada
+   learn portrait" bug. Scoped here instead so only the actually-draggable
+   list is affected. */
+/* Drag on the Code editor's palette (#palette-list) is gated by a
+   long-press timer in JS (see attachTouchDrag in app.js) rather than
+   touch-action:none — that earlier approach made EVERY touch on a block
+   immediately claim the gesture, leaving no way to scroll past blocks
+   packed edge-to-edge. Long-press means a quick swipe still scrolls
+   normally; only a held touch picks the block up. */
 /* Learn page blocks are click-only (no drag/drop) — override cursor */
 #build-palette-list .palette-block { cursor: pointer; }
 #build-palette-list .palette-block:active { transform: scale(.97); }
@@ -472,7 +481,7 @@ html, body {
 .stage-level-badge.level-medium { background: rgba(251,191,36,.15); color: #fbbf24; }
 .stage-level-badge.level-hard   { background: rgba(239,68,68,.15);  color: #ef4444; }
 
-.quest-stage-tile { padding-top: 34px; }
+.quest-stage-tile { padding-top: 46px; }
 .quest-stage-tile.locked {
   cursor: not-allowed; opacity: .5;
 }
@@ -856,9 +865,6 @@ html, body {
   cursor: grab;
   transition: filter .1s;
   z-index: 1;
-  /* Same reason as .palette-block above — hands touch gestures to the
-     JS touch-drag system instead of the canvas's default scroll. */
-  touch-action: none;
 }
 .program-block:hover { filter: brightness(1.1); }
 .program-block:active { cursor: grabbing; }
@@ -1685,8 +1691,17 @@ html, body {
     border-left: 1px solid var(--border) !important;
     border-top: none !important;
   }
-  #right-panel .panel-tabs,
-  #right-panel #robot-preview { display: flex !important; }
+  #right-panel .panel-tabs { display: flex !important; }
+  /* NOT !important, and NOT forcing it visible unconditionally — the
+     previous version (`#robot-preview { display:flex !important }`)
+     beat the .hidden class's own display:none rule regardless of which
+     tab (Robot/Quest/Sensor) was actually active, so the 3D model kept
+     showing even while viewing Quest info. This restores the DEFAULT
+     (portrait forces display:none for #robot-preview specifically —
+     see the earlier @media 820px block) without touching the .hidden
+     toggle at all, so switchPanelTab's own class logic decides it. */
+  #right-panel #robot-preview { display: flex; }
+  #right-panel #robot-preview.hidden { display: none; }
 
   /* Canvas normal overflow */
   #canvas { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }

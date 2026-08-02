@@ -1978,16 +1978,20 @@ function attachContainerDnD(containerEl, getArray, ctx) {
    actual touch pointers, so desktop drag-and-drop keeps working
    exactly as it did before.
 
-   Design matches how block editors like Scratch handle this on
-   mobile: touching a block picks it up immediately (no long-press),
-   and canvas/palette scrolling happens by touching empty space
-   between blocks instead — see the `touch-action: none` rule added
-   on .palette-block/.program-block in the CSS, which hands touch
-   handling on those elements entirely to this JS instead of the
-   browser's native scroll gesture.                                */
-let touchDrag = null; // { getPayload, payload, sourceEl, ghostEl, startX/Y, lastX/Y, dragging, lastContainer }
+   Drag is gated behind a LONG-PRESS timer (not touch-action:none on
+   the blocks) — the first version claimed every touch on a block
+   immediately, which meant a normal swipe-to-scroll gesture starting
+   on a block (which is most of the palette/canvas surface — blocks
+   are packed edge to edge) got hijacked into a drag instead, making
+   the whole page nearly impossible to scroll on touch. This mirrors
+   how Scratch/Blockly handle it on mobile: a quick swipe scrolls like
+   normal (we never call preventDefault unless the long-press fires),
+   and only a ~300ms held touch picks the block up.                  */
+let touchDrag = null; // { getPayload, payload, sourceEl, startX/Y, lastX/Y, dragging, ghostEl, lastContainer, timer, cancelled }
 
 const DND_INTERACTIVE_SELECTOR = '.block-val, .block-val-select, .block-del-btn, select';
+const TOUCH_DRAG_LONG_PRESS_MS = 300;   // hold this long, roughly still, to pick up a block
+const TOUCH_DRAG_MOVE_CANCEL_PX = 10;   // moving more than this before the timer fires = scrolling, not dragging
 
 /* A floating visual copy of the block being dragged, so the finger has
    something to visibly carry around (native drag image doesn't exist
@@ -2030,15 +2034,27 @@ function findDropContainerAt(clientX, clientY, ghost) {
    or {source:'canvas', id}). */
 function attachTouchDrag(el, getPayload) {
   el.addEventListener('touchstart', e => {
-    if (DND_INTERACTIVE_SELECTOR && e.target.closest(DND_INTERACTIVE_SELECTOR)) return; // let tap-to-edit/delete/select work normally
+    if (e.target.closest(DND_INTERACTIVE_SELECTOR)) return; // let tap-to-edit/delete/select work normally
     const t = e.touches[0];
-    touchDrag = {
+    const state = {
       getPayload, payload: null,
       sourceEl: el,
       startX: t.clientX, startY: t.clientY,
       lastX: t.clientX, lastY: t.clientY,
       ghostEl: null, dragging: false, lastContainer: null,
+      cancelled: false, timer: null,
     };
+    // Only actually picks the block up once this fires — a plain swipe
+    // that moves past the deadzone before then cancels it (see touchmove)
+    // and is left alone to scroll normally.
+    state.timer = setTimeout(() => {
+      if (state.cancelled || touchDrag !== state) return;
+      state.dragging = true;
+      state.payload = state.getPayload();
+      state.ghostEl = makeDragGhost(el, state.lastX, state.lastY);
+      el.style.opacity = '0.3';
+    }, TOUCH_DRAG_LONG_PRESS_MS);
+    touchDrag = state;
   }, { passive: true });
 
   el.addEventListener('touchmove', e => {
@@ -2048,19 +2064,21 @@ function attachTouchDrag(el, getPayload) {
     touchDrag.lastY = t.clientY;
 
     if (!touchDrag.dragging) {
-      // Small deadzone so a tap (e.g. on the palette-block itself,
-      // which has no tap action but shouldn't misfire on a tiny wobble)
-      // doesn't immediately count as a drag.
       const dx = Math.abs(t.clientX - touchDrag.startX);
       const dy = Math.abs(t.clientY - touchDrag.startY);
-      if (dx < 8 && dy < 8) return;
-      touchDrag.dragging = true;
-      touchDrag.payload = touchDrag.getPayload();
-      touchDrag.ghostEl = makeDragGhost(el, t.clientX, t.clientY);
-      el.style.opacity = '0.3';
+      if (dx > TOUCH_DRAG_MOVE_CANCEL_PX || dy > TOUCH_DRAG_MOVE_CANCEL_PX) {
+        // Moved too far before the long-press fired — this is a scroll,
+        // not a drag. Bail out without ever calling preventDefault, so
+        // the browser's native scroll handles the rest of this touch.
+        clearTimeout(touchDrag.timer);
+        touchDrag.cancelled = true;
+        touchDrag = null;
+      }
+      return;
     }
 
-    e.preventDefault(); // block-owns this gesture now, not the scroll container
+    // Long-press confirmed — this gesture is ours now.
+    e.preventDefault();
     positionDragGhost(touchDrag.ghostEl, t.clientX, t.clientY);
 
     const container = findDropContainerAt(t.clientX, t.clientY, touchDrag.ghostEl);
@@ -2073,7 +2091,8 @@ function attachTouchDrag(el, getPayload) {
 
   function endTouchDrag() {
     if (!touchDrag || touchDrag.sourceEl !== el) return;
-    const { dragging, lastContainer, payload, lastX, lastY, ghostEl } = touchDrag;
+    clearTimeout(touchDrag.timer);
+    const { dragging, lastContainer, payload, lastY, ghostEl } = touchDrag;
     el.style.opacity = '';
     if (ghostEl) ghostEl.remove();
     if (lastContainer) lastContainer.classList.remove('drop-active');
