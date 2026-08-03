@@ -980,6 +980,12 @@ function switchPage(pageName) {
   ALL_PAGES.forEach(elId => {
     document.getElementById(elId).classList.toggle('hidden', pageToElId[resolvedPage] !== elId);
   });
+  // Lets CSS target "only while X page is active" without needing a DOM
+  // relationship — used by the landscape media query to show Run/AI in
+  // the topbar ONLY on the Code page (previously that override applied
+  // unconditionally in landscape, so Run/AI kept showing on Learn/Home/
+  // etc too, ignoring the codeOnly display logic just below).
+  document.body.dataset.page = resolvedPage;
 
   // Home/Learn(sensor docs)/Quest/dashboards only need the logo — BLE/Run/AI
   // are editor-only (Code page). 'build' added here on request — this page
@@ -2410,7 +2416,7 @@ function smUpdateConnStatus() {
   const pill = document.getElementById('sm-conn-status');
   const text = document.getElementById('sm-conn-text');
   pill.classList.toggle('online', bleConnected);
-  text.textContent = bleConnected ? 'Terhubung & menerima data' : 'Belum terhubung ke robot';
+  text.textContent = bleConnected ? 'Terhubung — menerima data' : 'Belum terhubung ke robot';
 }
 
 function smResetAndShowFor(hasUltrasonic, hasLine) {
