@@ -1434,8 +1434,7 @@ html, body {
    it instead of beside it. Everything else (Home/Learn/Dashboards)
    was already grid-based and mostly just needs tighter spacing.
 ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 820px) {
-  /* Hamburger replaces the bottombar entirely at this width — five
+@media (max-width: 820px), (max-height: 500px) and (orientation: landscape) {
      labeled tabs simply don't fit a phone screen without truncating
      into uselessness, so mobile gets a proper slide-out drawer instead. */
   #hamburger-btn { display: flex; }
@@ -1611,7 +1610,7 @@ html, body {
    ════════════════════════════════════════════════════════════════ */
 
 /* ── Mobile Portrait (max-width: 820px) ─────────────────────── */
-@media (max-width: 820px) {
+@media (max-width: 820px), (max-height: 500px) and (orientation: landscape) {
 
   .build-header { flex-shrink: 0; padding: 10px 12px 4px; }
   .build-header h2 { font-size: 13px; }
@@ -1657,7 +1656,7 @@ html, body {
    is the most likely cause of the reported "berantakan" mess here.
    This version instead uses genuinely narrower column widths — no
    transform, so hit-testing/scrolling stays 1:1 with what's drawn. */
-@media (max-width: 820px) and (min-aspect-ratio: 4/3) {
+@media (max-height: 500px) and (orientation: landscape) {
 
   #main {
     grid-template-columns: 40px 155px 1fr 235px;
