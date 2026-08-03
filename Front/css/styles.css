@@ -1565,19 +1565,50 @@ html, body {
      shoving the sensor detail panel's photo/caption off-screen to
      the right instead of just scrolling horizontally within its own
      palette row like it's supposed to. */
-  /* Build page portrait: palette vertikal scroll di atas, sensor detail di bawah */
-  .build-page { display: flex; flex-direction: column; height: calc(100vh - var(--topbar-h)); overflow: hidden; }
-  .build-body { flex-direction: column !important; overflow: hidden !important; flex: 1; min-height: 0; }
+  /* Build page portrait: ONE scrollable page, same reasoning as the
+     landscape version below — previously the palette list (capped at
+     200px) AND the sensor detail box each had their OWN separate
+     internal overflow-y:auto, so only those individual boxes dragged
+     up/down while the page itself stayed fixed. Removed the internal
+     scroll boxes entirely; everything now flows in normal document
+     order and .build-page itself is the only scroll container. */
+  .build-page {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .build-body {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
   .build-body .palette-list, #build-palette-list {
-    width: 100% !important; flex: 0 0 auto !important;
+    width: 100% !important;
     flex-direction: column !important;
-    overflow-y: auto !important; overflow-x: hidden !important;
-    max-height: 200px;
+    overflow: visible !important;
+    max-height: none !important;
     border-right: none !important; border-bottom: 1px solid var(--border) !important;
     padding: 8px 10px !important;
     min-width: 0 !important; box-sizing: border-box;
   }
-  .sensor-detail-wrap { flex: 1 !important; min-height: 0 !important; overflow-y: auto !important; width: 100% !important; border-left: none !important; border-top: none !important; -webkit-overflow-scrolling: touch; }
+  .sensor-detail-wrap {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+    width: 100% !important;
+    border-left: none !important; border-top: none !important;
+  }
+  .sensor-detail-empty,
+  .sensor-detail-panel {
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .sensor-info-body { overflow: visible !important; flex: none !important; }
 
   /* Home / Learn / Dashboards: less breathing room, same structure */
   .home-main { padding: 20px 16px 60px; }
@@ -1723,7 +1754,43 @@ html, body {
   .quest-tile-title { font-size: 10px; }
   .quest-tile-desc  { font-size: 8px; }
 
-  /* Build/Learn landscape: palette HORIZONTAL scroll */
+  /* Build/Learn landscape: ONE scrollable page instead of splitting
+     palette (horizontal scroll) + detail (its own internal vertical
+     scroll) into separate regions — simpler to use with one thumb,
+     and matches how every other page (Home/Quest/Dashboard) already
+     scrolls as a whole via .home-main. The detail panel/empty-state
+     were built as position:absolute overlays (fine when their parent
+     had a fixed height to fill) — switched to static/normal flow here
+     so their real content height is what makes the page scrollable,
+     instead of being clipped to a fixed box. */
+  .build-page {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+  }
+  .build-body {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .sensor-detail-wrap {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+    width: 100% !important;
+  }
+  .sensor-detail-empty,
+  .sensor-detail-panel {
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .sensor-info-body { overflow: visible !important; flex: none !important; }
+
   .build-header { padding: 6px 12px 2px; }
   .build-header h2 { font-size: 12px; }
   .build-header p  { font-size: 9px; }
