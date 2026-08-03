@@ -1710,9 +1710,12 @@ html, body {
   /* Canvas normal overflow */
   #canvas { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
-  /* Landscape: Run & AI tampil di topbar, floating buttons disembunyikan */
-  #run-btn,
-  #ai-toggle-btn { display: flex !important; }
+  /* Landscape: Run & AI tampil di topbar, floating buttons disembunyikan —
+     tapi CUMA di halaman Code. Sebelumnya rule ini tanpa scope, jadi
+     Run/AI ikut muncul lagi di Learn/Home/dll di landscape padahal
+     seharusnya cuma untuk halaman Code. */
+  body[data-page="code"] #run-btn,
+  body[data-page="code"] #ai-toggle-btn { display: flex !important; }
   #mobile-run-btn,
   #mobile-ai-btn  { display: none !important; }
 
@@ -1727,10 +1730,46 @@ html, body {
   .quest-tile-title { font-size: 10px; }
   .quest-tile-desc  { font-size: 8px; }
 
-  /* Build/Learn landscape: palette scrolls horizontally (below), and
-     the sensor detail box keeps its own independent vertical scroll
-     inherited from the portrait rule above (.sensor-detail-wrap) —
-     only that box drags up/down, not the whole page. */
+  /* Build/Learn landscape: ONE scrollable page — dragging up scrolls
+     the header + chip row out of view along with the detail content,
+     so the detail box can effectively "take over" the screen once
+     scrolled. This is landscape-ONLY: portrait intentionally keeps the
+     header/chip-row fixed with just the detail box independently
+     scrollable (see the portrait rule above) — landscape has much
+     less vertical room to spare, so collapsing the header on scroll
+     matters more here. The detail panel/empty-state were built as
+     position:absolute overlays (fine when their parent had a fixed
+     height to fill) — switched to static/normal flow here so their
+     real content height is what makes the page scrollable, instead
+     of being clipped to a fixed box. */
+  .build-page {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+  }
+  .build-body {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .sensor-detail-wrap {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+    width: 100% !important;
+  }
+  .sensor-detail-empty,
+  .sensor-detail-panel {
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .sensor-info-body { overflow: visible !important; flex: none !important; }
+
   .build-header { padding: 6px 12px 2px; }
   .build-header h2 { font-size: 12px; }
   .build-header p  { font-size: 9px; }
