@@ -1197,6 +1197,15 @@ html, body {
   top: var(--topbar-h); right: 0;
   width: 340px;
   height: calc(100vh - var(--topbar-h) - var(--bottombar-h));
+  /* 100vh on mobile Chrome measures the LARGEST possible viewport (address
+     bar hidden), not what's actually visible right now (address bar
+     showing) — so this fixed-position panel could genuinely extend past
+     the bottom of the visible screen, cutting off content at the end
+     (the assess button) with no way to scroll to it (it's a positioning
+     problem, not an overflow one). 100dvh tracks the REAL current
+     viewport instead; browsers that don't support dvh yet just ignore
+     this line and keep the calc(100vh...) above as a fallback. */
+  height: calc(100dvh - var(--topbar-h) - var(--bottombar-h));
   background: var(--bg-panel);
   border-left: 1px solid var(--border);
   display: flex; flex-direction: column;
@@ -1555,7 +1564,7 @@ html, body {
      but #bottombar is display:none on mobile (hamburger drawer takes
      over) and #app's grid no longer reserves that row — so the panel
      must go full height below the topbar, not leave a stray gap. */
-  #ai-panel { height: calc(100vh - var(--topbar-h)); }
+  #ai-panel { height: calc(100vh - var(--topbar-h)); height: calc(100dvh - var(--topbar-h)); }
   #ai-panel-backdrop.open { display: block; }
 
   /* Build page: same stacking idea, palette above canvas.
