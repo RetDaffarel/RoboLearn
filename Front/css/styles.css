@@ -1435,6 +1435,7 @@ html, body {
    was already grid-based and mostly just needs tighter spacing.
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 820px), (max-height: 500px) and (orientation: landscape) {
+  /* Hamburger replaces the bottombar entirely at this width — five
      labeled tabs simply don't fit a phone screen without truncating
      into uselessness, so mobile gets a proper slide-out drawer instead. */
   #hamburger-btn { display: flex; }
