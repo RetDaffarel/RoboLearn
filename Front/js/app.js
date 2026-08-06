@@ -196,9 +196,31 @@ async function saveProjectToFirestore() {
 const QUEST_PASS_SCORE = 70;
 const LEVEL_LABEL = { easy: 'Mudah', medium: 'Sedang', hard: 'Sulit' };
 
+/* ── Quest icons — inline SVG instead of emoji ────────────────────
+   Emoji render inconsistently across OS/device emoji fonts (Android's
+   Noto Color Emoji vs Apple's set vs others) — different visual size,
+   baseline, and weight per device. That's the likely root cause of the
+   quest-tile badge/icon overlap bug patched earlier (just added more
+   padding as a buffer, not a real fix). SVG with currentColor renders
+   pixel-identical everywhere. questIconHTML() falls back to returning
+   the raw string untouched for any key it doesn't recognize — that's
+   what lets teacher-typed custom quest icons (still plain emoji text,
+   out of scope for this pass) keep working exactly as before. */
+const ICON_SVG = {
+  ultrasonic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><path d="M5.3 12.3a9 9 0 0 1 13.4 0"/><path d="M2.2 9.2a13 13 0 0 1 19.6 0"/></svg>',
+  gripper: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5"/><path d="M8 8c-2.2 0-4 1.8-4 4s1.3 3.6 3 4"/><path d="M16 8c2.2 0 4 1.8 4 4s-1.3 3.6-3 4"/><path d="M7 16l-1.3 5"/><path d="M17 16l1.3 5"/><circle cx="12" cy="5.5" r="2.5"/></svg>',
+  led_buzzer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18h5"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .8 1.7v.6h6.4v-.6c0-.7.3-1.3.8-1.7A7 7 0 0 0 12 2z"/></svg>',
+  line_follower: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22 8 2"/><path d="M20 22 16 2"/><path d="M12 2v3"/><path d="M12 9.5v3"/><path d="M12 17v3"/></svg>',
+  locked: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',
+};
+function questIconHTML(key) {
+  return ICON_SVG[key] || key; // unknown key (e.g. raw teacher-typed emoji) — pass through as-is
+}
+
 const QUEST_TRACKS = [
   {
-    trackId: 'ultrasonic', icon: '📡', title: 'Sensor Ultrasonik',
+    trackId: 'ultrasonic', icon: 'ultrasonic', title: 'Sensor Ultrasonik',
     stages: [
       {
         level: 'easy', id: 'ultrasonic_easy', title: 'Berhenti Sebelum Menabrak',
@@ -221,7 +243,7 @@ const QUEST_TRACKS = [
     ],
   },
   {
-    trackId: 'gripper', icon: '🦾', title: 'Gripper / Arm',
+    trackId: 'gripper', icon: 'gripper', title: 'Gripper / Arm',
     stages: [
       {
         level: 'easy', id: 'gripper_easy', title: 'Buka-Tutup Gripper',
@@ -244,7 +266,7 @@ const QUEST_TRACKS = [
     ],
   },
   {
-    trackId: 'led_buzzer', icon: '💡', title: 'LED RGB + Buzzer',
+    trackId: 'led_buzzer', icon: 'led_buzzer', title: 'LED RGB + Buzzer',
     stages: [
       {
         level: 'easy', id: 'led_buzzer_easy', title: 'Sinyal Siap',
@@ -267,7 +289,7 @@ const QUEST_TRACKS = [
     ],
   },
   {
-    trackId: 'line_follower', icon: '🛣️', title: 'Sensor Garis',
+    trackId: 'line_follower', icon: 'line_follower', title: 'Sensor Garis',
     stages: [
       {
         level: 'easy', id: 'line_follower_easy', title: 'Ikuti Garis Lurus',
@@ -334,7 +356,7 @@ let questProgress        = {};                 // { [questId]: { completed, best
 function renderQuestInfoPanel() {
   if (!currentQuestObj) return;
   const q = currentQuestObj;
-  document.getElementById('qi-icon').textContent = q.icon || '🎯';
+  document.getElementById('qi-icon').innerHTML = questIconHTML(q.icon || 'target');
   document.getElementById('qi-title').textContent = q.title || 'Quest';
   document.getElementById('qi-desc').textContent = q.desc || '';
   document.getElementById('qi-hint').textContent = q.hint || q.goal || '';
@@ -555,7 +577,7 @@ function renderQuestGrid(containerId) {
       tile.className = 'quest-tile';
       tile.innerHTML = `
         ${allDone ? '<span class="quest-tile-badge">✅ Selesai semua</span>' : ''}
-        <div class="quest-tile-icon">${track.icon}</div>
+        <div class="quest-tile-icon">${questIconHTML(track.icon)}</div>
         <div class="quest-tile-title">${track.title}</div>
         <div class="quest-tile-sub">${LEVEL_LABEL[next.level]} ${allDone ? '(ulangi Sulit)' : ''}</div>
         <div class="quest-tile-desc">${next.desc}</div>
@@ -574,7 +596,7 @@ function renderQuestGrid(containerId) {
   QUEST_TRACKS.forEach(track => {
     const section = document.createElement('div');
     section.className = 'quest-track-section';
-    section.innerHTML = `<div class="quest-track-header"><span>${track.icon}</span> ${track.title}</div>`;
+    section.innerHTML = `<div class="quest-track-header"><span>${questIconHTML(track.icon)}</span> ${track.title}</div>`;
     const row = document.createElement('div');
     row.className = 'quest-track-row';
 
@@ -586,7 +608,7 @@ function renderQuestGrid(containerId) {
       tile.innerHTML = `
         <span class="stage-level-badge level-${q.level}">${LEVEL_LABEL[q.level]}</span>
         ${progress?.completed ? '<span class="quest-tile-badge">✅ Selesai</span>' : ''}
-        <div class="quest-tile-icon">${unlocked ? q.icon : '🔒'}</div>
+        <div class="quest-tile-icon">${unlocked ? questIconHTML(q.icon) : questIconHTML('locked')}</div>
         <div class="quest-tile-title">${q.title}</div>
         <div class="quest-tile-desc">${unlocked ? q.desc : 'Selesaikan tingkat sebelumnya dulu untuk membuka ini.'}</div>
       `;
@@ -698,7 +720,7 @@ async function renderGuruDashboard(containerId = 'guru-student-list') {
         <div class="quest-badge-row">
           ${allQuests().map(q => {
             const p = (s.quest_progress || {})[q.id];
-            return `<span class="quest-mini-badge ${p?.completed ? 'done' : ''}">${q.icon} ${p?.completed ? `✓ ${p.bestScore}` : 'belum'}</span>`;
+            return `<span class="quest-mini-badge ${p?.completed ? 'done' : ''}">${questIconHTML(q.icon)} ${p?.completed ? `✓ ${p.bestScore}` : 'belum'}</span>`;
           }).join('')}
         </div>
         <div class="dash-history" id="${historyId}"></div>
@@ -1785,7 +1807,7 @@ function renderSensorInfoBody() {
              style="max-width:100%;max-height:220px;border-radius:10px;object-fit:contain;"
              onerror="handleSensorPhotoError(this)" />
       </div>
-      <p style="text-align:center;font-style:italic;">Foto modul ${data.title}</p>`;
+      <p style="text-align:center;font-style:italic;">Foto modul — kalau belum ada, tampil diagram ilustrasi sebagai gantinya.</p>`;
   } else if (sensorInfoActiveTab === 'pin') {
     const rows = data.pins.map(p => `
       <tr>
