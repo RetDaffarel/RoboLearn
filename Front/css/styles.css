@@ -707,6 +707,33 @@ html, body {
   resize: vertical; font-family: var(--font); width: 100%;
   box-sizing: border-box;
 }
+/* Icon picker — teacher's "create quest" form. Grid of pre-made SVG
+   icon options instead of a free-text emoji field. */
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+.icon-picker-option {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-md);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.icon-picker-option svg { width: 1em; height: 1em; }
+.icon-picker-option:hover { background: var(--bg-hover); color: var(--text-primary); }
+.icon-picker-option.selected {
+  background: rgba(255,107,43,.15);
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
 .quest-modal-actions {
   display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;
 }

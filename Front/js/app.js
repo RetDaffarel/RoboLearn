@@ -213,9 +213,51 @@ const ICON_SVG = {
   line_follower: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22 8 2"/><path d="M20 22 16 2"/><path d="M12 2v3"/><path d="M12 9.5v3"/><path d="M12 17v3"/></svg>',
   locked: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  // Broader set for the teacher's "create quest" icon picker — general
+  // quest themes not tied to a specific built-in sensor track.
+  robot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="2"/><circle cx="9" cy="14.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14.5" r="1.3" fill="currentColor" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="3.5" r="1.5"/><path d="M2 13h2M20 13h2"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.3l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.6 5l-6.4 6.4a2 2 0 1 0 2.8 2.8l6.4-6.4a4 4 0 0 0 5-5.6l-2.5 2.5-2-2z"/></svg>',
+  sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="4 9 8 9 12 5 12 19 8 15 4 15 4 9"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M20 5a9 9 0 0 1 0 14"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.1 8.6 22 9.6 17 14.6 18.2 21.6 12 18.3 5.8 21.6 7 14.6 2 9.6 8.9 8.6 12 2"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h13l-2.5 4L17 12H4"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>',
+  zap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 11 14 10 22 21 10 13 10 13 2"/></svg>',
+  puzzle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v2.5a1.5 1.5 0 0 0 3 0V3h4a1 1 0 0 1 1 1v4h-2.5a1.5 1.5 0 0 0 0 3H17v4a1 1 0 0 1-1 1h-4v-2.5a1.5 1.5 0 0 0-3 0V16H5a1 1 0 0 1-1-1v-4h2.5a1.5 1.5 0 0 0 0-3H4V4a1 1 0 0 1 1-1h4z"/></svg>',
 };
+/* Curated subset (and display order) offered in the teacher's "create
+   quest" icon picker — a reasonable spread of themes, not literally
+   every key in ICON_SVG (ultrasonic/gripper/etc. are sensor-track-
+   specific and would be a confusing default set for a general quest). */
+const QUEST_PICKER_ICONS = ['target', 'robot', 'gear', 'wrench', 'zap', 'sound', 'camera', 'puzzle', 'star', 'flag', 'locked', 'line_follower'];
 function questIconHTML(key) {
   return ICON_SVG[key] || key; // unknown key (e.g. raw teacher-typed emoji) — pass through as-is
+}
+
+/* Renders the icon-picker grid inside the quest form and wires up
+   selection. `selectedKey` is whichever icon the quest currently has
+   (existing quest being edited) or 'target' as the sensible default
+   for a brand-new quest. Selecting an option updates the hidden
+   #qf-icon input's value — every other piece of code (openQuestForm,
+   the submit handler) reads that value exactly like it did when this
+   was a free-text field, so nothing else needed to change. */
+function renderQuestIconPicker(selectedKey) {
+  const picker = document.getElementById('qf-icon-picker');
+  const hiddenInput = document.getElementById('qf-icon');
+  picker.innerHTML = '';
+  QUEST_PICKER_ICONS.forEach(key => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'icon-picker-option' + (key === selectedKey ? ' selected' : '');
+    btn.innerHTML = questIconHTML(key);
+    btn.setAttribute('aria-label', key);
+    btn.addEventListener('click', () => {
+      hiddenInput.value = key;
+      picker.querySelectorAll('.icon-picker-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    picker.appendChild(btn);
+  });
 }
 
 const QUEST_TRACKS = [
@@ -459,7 +501,7 @@ function renderMyQuests(containerId) {
     row.innerHTML = `
       <div class="dash-row-top">
         <div>
-          <div class="dash-row-email">${q.icon} ${q.title}</div>
+          <div class="dash-row-email">${questIconHTML(q.icon)} ${q.title}</div>
           <div class="dash-row-sub">${q.subtitle || ''}${byOther ? ` · dibuat oleh ${q.created_by_email || 'guru lain'}` : ''}</div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -493,7 +535,8 @@ function openQuestForm(existingQuest = null) {
   document.getElementById('quest-form-heading').textContent =
     existingQuest ? '✏️ Edit Quest' : '🎯 Buat Quest Baru';
   document.getElementById('qf-submit').textContent = existingQuest ? 'Simpan Perubahan' : 'Simpan Quest';
-  document.getElementById('qf-icon').value = existingQuest?.icon || '';
+  document.getElementById('qf-icon').value = existingQuest?.icon || 'target';
+  renderQuestIconPicker(existingQuest?.icon || 'target');
   document.getElementById('qf-title').value = existingQuest?.title || '';
   document.getElementById('qf-subtitle').value = existingQuest?.subtitle || '';
   document.getElementById('qf-desc').value = existingQuest?.desc || '';
@@ -632,7 +675,7 @@ function renderQuestGrid(containerId) {
       tile.className = 'quest-tile';
       tile.innerHTML = `
         ${progress?.completed ? '<span class="quest-tile-badge">✅ Selesai</span>' : '<span class="quest-tile-badge custom">👩‍🏫 Guru</span>'}
-        <div class="quest-tile-icon">${q.icon}</div>
+        <div class="quest-tile-icon">${questIconHTML(q.icon)}</div>
         <div class="quest-tile-title">${q.title}</div>
         <div class="quest-tile-sub">${q.subtitle || ''}</div>
         <div class="quest-tile-desc">${q.desc}</div>

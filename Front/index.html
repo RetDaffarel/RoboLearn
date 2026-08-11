@@ -615,8 +615,9 @@
   <div class="quest-modal">
     <h3 id="quest-form-heading">🎯 Buat Quest Baru</h3>
 
-    <label for="qf-icon">Icon (emoji)</label>
-    <input class="auth-input" id="qf-icon" type="text" placeholder="🎯" maxlength="4" />
+    <label>Icon Quest</label>
+    <div class="icon-picker" id="qf-icon-picker"><!-- populated by JS --></div>
+    <input type="hidden" id="qf-icon" value="target" />
 
     <label for="qf-title">Judul</label>
     <input class="auth-input" id="qf-title" type="text" placeholder="misal: Robot Penjaga Pintu" maxlength="60" />
