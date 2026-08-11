@@ -1291,6 +1291,22 @@ html, body {
   padding: 4px 0;
 }
 .health-icon { font-size: 14px; }
+.health-icon.ok   { color: var(--accent-green); }
+.health-icon.fail { color: var(--accent-red); }
+.health-icon svg { width: 1em; height: 1em; display: inline-block; vertical-align: -0.15em; }
+
+/* Sizes the inline SVG nav/action icons (see Phase 2 icon migration)
+   consistently — 1em ties each to whatever font-size its container
+   already has, same pattern as the quest icons above. */
+.nav-icon svg,
+#mobile-nav-close svg,
+#ai-close-btn svg,
+.auth-toggle-pw svg,
+#trash-btn svg {
+  width: 1em; height: 1em;
+  display: inline-block;
+  vertical-align: -0.15em;
+}
 
 /* Suggestions list */
 .suggestion-item {
