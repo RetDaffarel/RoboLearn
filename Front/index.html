@@ -616,7 +616,13 @@
     <h3 id="quest-form-heading">🎯 Buat Quest Baru</h3>
 
     <label>Icon Quest</label>
-    <div class="icon-picker" id="qf-icon-picker"><!-- populated by JS --></div>
+    <div class="icon-dropdown" id="qf-icon-dropdown">
+      <button type="button" class="icon-dropdown-toggle" id="qf-icon-toggle" aria-haspopup="listbox" aria-expanded="false">
+        <span id="qf-icon-toggle-preview"><!-- populated by JS --></span>
+        <svg class="icon-dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="icon-dropdown-panel hidden" id="qf-icon-panel" role="listbox"><!-- populated by JS --></div>
+    </div>
     <input type="hidden" id="qf-icon" value="target" />
 
     <label for="qf-title">Judul</label>

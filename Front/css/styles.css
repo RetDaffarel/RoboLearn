@@ -707,15 +707,30 @@ html, body {
   resize: vertical; font-family: var(--font); width: 100%;
   box-sizing: border-box;
 }
-/* Icon picker — teacher's "create quest" form. Grid of pre-made SVG
-   icon options instead of a free-text emoji field. */
-.icon-picker {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  margin: 6px 0 4px;
+/* Icon dropdown — teacher's "create quest" form. Toggle button shows
+   the current selection; clicking it opens a panel of pre-made SVG
+   icon options (only icons already used elsewhere in the app). */
+.icon-dropdown { position: relative; margin: 6px 0 4px; }
+.icon-dropdown-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 9px 11px;
+  background: var(--bg-app); border: 1px solid var(--border-md);
+  border-radius: 8px; color: var(--text-primary);
+  font-size: 18px; cursor: pointer;
+  transition: border-color .15s;
 }
-.icon-picker-option {
+.icon-dropdown-toggle:hover { border-color: var(--text-secondary); }
+.icon-dropdown-toggle[aria-expanded="true"] { border-color: var(--accent-orange); }
+.icon-dropdown-toggle svg:not(.icon-dropdown-caret) { width: 1em; height: 1em; }
+.icon-dropdown-caret { color: var(--text-secondary); flex-shrink: 0; }
+.icon-dropdown-panel {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 10;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+  padding: 10px;
+  background: var(--bg-panel); border: 1px solid var(--border-md);
+  border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.icon-dropdown-option {
   aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-card);
@@ -726,9 +741,9 @@ html, body {
   font-size: 18px;
   transition: background .12s, border-color .12s, color .12s;
 }
-.icon-picker-option svg { width: 1em; height: 1em; }
-.icon-picker-option:hover { background: var(--bg-hover); color: var(--text-primary); }
-.icon-picker-option.selected {
+.icon-dropdown-option svg { width: 1em; height: 1em; }
+.icon-dropdown-option:hover { background: var(--bg-hover); color: var(--text-primary); }
+.icon-dropdown-option.selected {
   background: rgba(255,107,43,.15);
   border-color: var(--accent-orange);
   color: var(--accent-orange);
