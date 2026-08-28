@@ -1126,6 +1126,7 @@ const TOUR_STORAGE_KEY = 'robolearn_tour_seen_v1';
 const TOUR_STEPS = [
   { page: 'home', target: '#card-project', title: 'Proyek Kamu', text: 'Semua program yang sudah kamu simpan muncul di sini. Klik "Buka" untuk lanjut kerjain, atau buat proyek baru.' },
   { page: 'home', target: '#card-quest', title: 'Quest', text: 'Tantangan kecil untuk kenalan sama tiap sensor robot — hasilnya langsung dinilai AI.' },
+  { page: 'code', target: '#category-sidebar', title: 'Kategori Blok', text: 'Bulatan warna-warni ini adalah kategori blok — Motion, Looks, Sound, Events, Control, Sensors, Operators, Variables. Klik salah satu untuk lihat isinya di daftar blok sebelah kanan.' },
   { page: 'code', target: '#palette', title: 'Daftar Blok', text: 'Ambil blok dari sini (drag di desktop, tekan-tahan lalu geser di HP) untuk menyusun program di canvas sebelah kanan.' },
   { page: 'code', target: '#canvas-wrap', title: 'Canvas', text: 'Susun blok-blok jadi program lengkap di sini. Blok yang menyambung akan berjalan berurutan dari atas ke bawah.' },
   { page: 'code', target: '#run-btn', targetMobile: '#mobile-run-btn', title: 'Run', text: 'Tekan ini untuk menjalankan program — ke robot asli kalau sudah terhubung, atau simulasi kalau belum.' },
