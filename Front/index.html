@@ -107,6 +107,14 @@
     </div>
 
     <div class="topbar-right">
+      <button class="btn-icon" id="tour-restart-btn" title="Panduan Penggunaan" aria-label="Tampilkan panduan penggunaan">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/>
+          <circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+
       <div id="user-badge">
         <span class="dot-status" id="conn-dot"></span>
         <span id="user-email">—</span>
@@ -596,6 +604,9 @@
     <button class="mobile-nav-item hidden" id="mobile-dashboard-item" data-nav="dashboard">
       <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="6" width="4" height="15"/><rect x="17" y="9" width="4" height="12"/></svg></span> Dashboard
     </button>
+    <button class="mobile-nav-item" id="mobile-tour-btn">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg></span> Panduan
+    </button>
     <div class="mobile-nav-divider"></div>
     <div class="mobile-nav-user">
       <span class="dot-status" id="mobile-conn-dot"></span>
@@ -738,6 +749,28 @@
 
   </div>
 </aside>
+
+<!-- ════════════════════════════════════════════════════
+     FIRST-RUN TOUR — spotlight overlay walking through the main
+     features. Auto-shows once per browser on first login (see
+     app.js), replayable anytime via the "?" button in the topbar
+     or "Panduan" in the mobile drawer.
+══════════════════════════════════════════════════════ -->
+<div id="tour-overlay" class="hidden">
+  <div id="tour-spotlight"></div>
+  <div id="tour-tooltip">
+    <div id="tour-tooltip-title">Judul</div>
+    <div id="tour-tooltip-text">Deskripsi.</div>
+    <div class="tour-tooltip-footer">
+      <span id="tour-step-counter">1 / 8</span>
+      <div class="tour-tooltip-actions">
+        <button id="tour-skip-btn" type="button">Lewati</button>
+        <button id="tour-prev-btn" type="button">Kembali</button>
+        <button id="tour-next-btn" type="button">Lanjut</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>

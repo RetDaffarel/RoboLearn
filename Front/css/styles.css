@@ -1545,6 +1545,7 @@ html, body {
   #run-btn,
   #ai-toggle-btn,
   #settings-btn,
+  #tour-restart-btn,
   #user-badge,
   #logout-btn {
     display: none !important;
@@ -1896,4 +1897,56 @@ html, body {
 @media (min-width: 821px) and (max-height: 600px) {
   .quest-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .home-cards { grid-template-columns: 280px 1fr; gap: 16px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FIRST-RUN TOUR — spotlight overlay
+   ══════════════════════════════════════════════════════════════ */
+#tour-overlay { position: fixed; inset: 0; z-index: 9999; }
+#tour-overlay.hidden { display: none; }
+
+/* The "hole" — a transparent box whose oversized box-shadow darkens
+   everything else on screen, creating the spotlight cutout. Position/
+   size are set by JS to match whatever element is being highlighted. */
+#tour-spotlight {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.78);
+  transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease;
+  pointer-events: none;
+}
+
+#tour-tooltip {
+  position: fixed;
+  width: 280px; max-width: calc(100vw - 24px);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-md);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  z-index: 10000;
+}
+#tour-tooltip-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+#tour-tooltip-text  { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px; }
+.tour-tooltip-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+#tour-step-counter { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.tour-tooltip-actions { display: flex; gap: 6px; }
+#tour-skip-btn {
+  background: transparent; border: none; color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; padding: 6px 4px;
+}
+#tour-skip-btn:hover { color: var(--text-primary); }
+#tour-prev-btn {
+  background: var(--bg-card); border: 1px solid var(--border-md); color: var(--text-primary);
+  border-radius: 7px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+}
+#tour-prev-btn.hidden { display: none; }
+#tour-next-btn {
+  background: var(--accent-orange); border: none; color: #1a0e05; font-weight: 700;
+  border-radius: 7px; padding: 6px 14px; font-size: 12px; cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  #tour-tooltip { width: 250px; padding: 14px; }
 }

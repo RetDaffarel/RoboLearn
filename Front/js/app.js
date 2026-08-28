@@ -1096,6 +1096,145 @@ function activateNavButton(navId) {
   document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.toggle('active', b.dataset.nav === navId));
 }
 
+/* ── First-run tour (spotlight overlay) ───────────────────────
+   Walks through the main features with a dark cutout highlighting
+   one element at a time + a tooltip explaining it. Runs automatically
+   once per browser after first login (see the onAuthStateChanged
+   trigger below), and is replayable anytime via the "?" button in
+   the topbar (desktop) or "Panduan" in the mobile drawer.
+
+   Steps can specify `page` — the tour switches pages for you between
+   steps (e.g. Home -> Code) using the same switchPage()/
+   activateNavButton() everything else uses, so it's never a special
+   case. `targetMobile` is an alternate selector tried when the
+   desktop one isn't currently visible (e.g. #run-btn is hidden on
+   phones in favor of the floating #mobile-run-btn) — steps whose
+   target STILL can't be found (element genuinely not on screen, e.g.
+   the BLE button on a very cramped layout) are skipped automatically
+   rather than showing a spotlight pointing at nothing. */
+/* Called once after a student lands on Home post-login. Delay lets the
+   home page's data (project list, quest grid) finish rendering first,
+   so the spotlight's targets exist with their real final layout. */
+function maybeStartFirstRunTour() {
+  let alreadySeen = true;
+  try { alreadySeen = !!localStorage.getItem(TOUR_STORAGE_KEY); } catch (err) { /* private browsing — just don't auto-start */ }
+  if (!alreadySeen) setTimeout(startTour, 700);
+}
+
+const TOUR_STORAGE_KEY = 'robolearn_tour_seen_v1';
+
+const TOUR_STEPS = [
+  { page: 'home', target: '#card-project', title: 'Proyek Kamu', text: 'Semua program yang sudah kamu simpan muncul di sini. Klik "Buka" untuk lanjut kerjain, atau buat proyek baru.' },
+  { page: 'home', target: '#card-quest', title: 'Quest', text: 'Tantangan kecil untuk kenalan sama tiap sensor robot — hasilnya langsung dinilai AI.' },
+  { page: 'code', target: '#palette', title: 'Daftar Blok', text: 'Ambil blok dari sini (drag di desktop, tekan-tahan lalu geser di HP) untuk menyusun program di canvas sebelah kanan.' },
+  { page: 'code', target: '#canvas-wrap', title: 'Canvas', text: 'Susun blok-blok jadi program lengkap di sini. Blok yang menyambung akan berjalan berurutan dari atas ke bawah.' },
+  { page: 'code', target: '#run-btn', targetMobile: '#mobile-run-btn', title: 'Run', text: 'Tekan ini untuk menjalankan program — ke robot asli kalau sudah terhubung, atau simulasi kalau belum.' },
+  { page: 'code', target: '#ai-toggle-btn', targetMobile: '#mobile-ai-btn', title: 'Penilaian AI', text: 'Minta AI menilai program kamu dan kasih saran perbaikan, kapan saja.' },
+  { page: 'code', target: '#ble-btn', title: 'Sambungkan Robot', text: 'Tekan ini untuk menyambungkan ke robot ESP32 kamu lewat Bluetooth.' },
+];
+
+let tourIndex = 0;
+let tourCurrentPage = null;
+
+function tourElementVisible(el) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
+function tourResolveTarget(step) {
+  let el = document.querySelector(step.target);
+  if (tourElementVisible(el)) return el;
+  if (step.targetMobile) {
+    el = document.querySelector(step.targetMobile);
+    if (tourElementVisible(el)) return el;
+  }
+  return null;
+}
+
+function positionTourUI(el) {
+  const rect = el.getBoundingClientRect();
+  const pad = 6;
+  const spotlight = document.getElementById('tour-spotlight');
+  spotlight.style.top = `${rect.top - pad}px`;
+  spotlight.style.left = `${rect.left - pad}px`;
+  spotlight.style.width = `${rect.width + pad * 2}px`;
+  spotlight.style.height = `${rect.height + pad * 2}px`;
+
+  const tooltip = document.getElementById('tour-tooltip');
+  tooltip.style.visibility = 'hidden';
+  // Measure AFTER the title/text are set (caller does that first) but
+  // before final placement, so width/height reflect the real content.
+  requestAnimationFrame(() => {
+    const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+    let top = rect.bottom + 14;
+    if (top + th > window.innerHeight - 12) top = Math.max(rect.top - th - 14, 12);
+    let left = Math.min(Math.max(rect.left, 12), window.innerWidth - tw - 12);
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.visibility = 'visible';
+  });
+}
+
+function renderTourStep() {
+  if (tourIndex < 0) tourIndex = 0;
+  if (tourIndex >= TOUR_STEPS.length) { endTour(); return; }
+  const step = TOUR_STEPS[tourIndex];
+
+  function proceed() {
+    const el = tourResolveTarget(step);
+    if (!el) {
+      // Target isn't on screen right now (hidden by role/layout) —
+      // skip straight to the next step instead of pointing at nothing.
+      tourIndex++;
+      renderTourStep();
+      return;
+    }
+    document.getElementById('tour-tooltip-title').textContent = step.title;
+    document.getElementById('tour-tooltip-text').textContent = step.text;
+    document.getElementById('tour-step-counter').textContent = `${tourIndex + 1} / ${TOUR_STEPS.length}`;
+    document.getElementById('tour-prev-btn').classList.toggle('hidden', tourIndex === 0);
+    document.getElementById('tour-next-btn').textContent = tourIndex === TOUR_STEPS.length - 1 ? 'Selesai' : 'Lanjut';
+    if (el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    positionTourUI(el);
+  }
+
+  if (step.page && step.page !== tourCurrentPage) {
+    tourCurrentPage = step.page;
+    activateNavButton(step.page);
+    switchPage(step.page);
+    // Give switchPage's .hidden-class toggling and any layout/transition
+    // a moment to settle before measuring positions.
+    setTimeout(proceed, 220);
+  } else {
+    proceed();
+  }
+}
+
+function startTour() {
+  tourIndex = 0;
+  tourCurrentPage = null;
+  document.getElementById('tour-overlay').classList.remove('hidden');
+  renderTourStep();
+}
+
+function endTour() {
+  document.getElementById('tour-overlay').classList.add('hidden');
+  try { localStorage.setItem(TOUR_STORAGE_KEY, '1'); } catch (err) { /* private browsing etc — fine, tour just replays next time */ }
+}
+
+document.getElementById('tour-next-btn').addEventListener('click', () => { tourIndex++; renderTourStep(); });
+document.getElementById('tour-prev-btn').addEventListener('click', () => { tourIndex--; renderTourStep(); });
+document.getElementById('tour-skip-btn').addEventListener('click', endTour);
+document.getElementById('tour-restart-btn').addEventListener('click', startTour);
+document.getElementById('mobile-tour-btn').addEventListener('click', () => {
+  mobileNavOverlay.classList.remove('show');
+  startTour();
+});
+window.addEventListener('resize', () => {
+  if (!document.getElementById('tour-overlay').classList.contains('hidden')) renderTourStep();
+});
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     activateNavButton(btn.dataset.nav);
@@ -1406,6 +1545,7 @@ onAuthStateChanged(auth, user => {
         loadStudentHomeData();
         activateNavButton('home');
         switchPage('home');
+        maybeStartFirstRunTour();
       }
     }).catch(err => {
       console.warn('Failed to read role claim:', err.message);
@@ -1414,6 +1554,7 @@ onAuthStateChanged(auth, user => {
       loadStudentHomeData();
       activateNavButton('home');
       switchPage('home');
+      maybeStartFirstRunTour();
     });
   } else {
     authOverlay.classList.remove('hidden');
