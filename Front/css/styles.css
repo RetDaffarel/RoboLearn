@@ -1908,18 +1908,11 @@ html, body {
 
 /* The "hole" — a transparent box whose oversized box-shadow darkens
    everything else on screen, creating the spotlight cutout. Position/
-   size are set by JS to match whatever element is being highlighted.
-   A plain dark overlay alone barely reads as a "spotlight" against
-   this app's already-dark theme (dimmed vs. undimmed dark UI looks
-   nearly identical) — the orange ring + glow is what actually makes
-   the highlighted element unmistakable regardless of background. */
+   size are set by JS to match whatever element is being highlighted. */
 #tour-spotlight {
   position: fixed;
   border-radius: 10px;
-  box-shadow:
-    0 0 0 9999px rgba(0,0,0,.82),
-    0 0 0 3px var(--accent-orange),
-    0 0 22px 4px rgba(255,107,43,.55);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.78);
   transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease;
   pointer-events: none;
 }
