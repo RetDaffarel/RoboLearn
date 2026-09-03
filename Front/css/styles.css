@@ -1950,3 +1950,112 @@ html, body {
 @media (max-width: 480px) {
   #tour-tooltip { width: 250px; padding: 14px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MANUAL DRIVE CONTROL — full-screen overlay
+   ══════════════════════════════════════════════════════════════ */
+#drive-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: var(--bg-app);
+  display: flex; flex-direction: column;
+}
+#drive-overlay.hidden { display: none; }
+
+.drive-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drive-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+.drive-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  font-size: 12px; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drive-status.online { color: var(--accent-green); }
+.drive-status.online .dot-status { background: var(--accent-green); }
+
+.drive-body {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 28px;
+  padding: 24px 16px 40px;
+}
+
+.drive-speed-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; max-width: 340px;
+}
+.drive-speed-row input[type="range"] { flex: 1; }
+#drive-speed-val { font-size: 12px; font-weight: 600; color: var(--accent-orange); min-width: 36px; text-align: right; }
+
+/* Joystick — a circular base the knob is dragged within, clamped to
+   the base's radius. Positioning of the knob itself is done via JS
+   (transform: translate), this just styles the two static circles. */
+.joystick-wrap { display: flex; justify-content: center; }
+.joystick-base {
+  position: relative;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-md);
+  touch-action: none;
+}
+.joystick-knob {
+  position: absolute; top: 50%; left: 50%;
+  width: 76px; height: 76px;
+  margin: -38px 0 0 -38px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  box-shadow: 0 4px 16px rgba(255,107,43,.4);
+  transition: transform .05s linear;
+}
+
+.drive-key-hints { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.key-hint-row { display: flex; gap: 8px; }
+.key-cap {
+  min-width: 64px; padding: 12px 10px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  color: var(--text-secondary);
+  font-size: 13px; font-weight: 700; text-align: center;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.key-cap.active {
+  background: rgba(255,107,43,.18);
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+.drive-key-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.drive-extra-controls {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  width: 100%; max-width: 340px;
+}
+.drive-extra-btn {
+  flex: 1; min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+}
+.drive-extra-btn:hover { background: var(--bg-hover); }
+.drive-extra-btn.drive-stop-btn {
+  background: rgba(239,68,68,.15);
+  border-color: rgba(239,68,68,.4);
+  color: var(--accent-red);
+  flex-basis: 100%;
+}
+
+@media (max-width: 480px) {
+  .joystick-base { width: 170px; height: 170px; }
+  .joystick-knob { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+}

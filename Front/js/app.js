@@ -2899,6 +2899,14 @@ async function connectBLE() {
       bleLabel.textContent = 'Scan & Connect Robot';
       showToast('Disconnected from robot');
       smUpdateConnStatus();
+      // Safety: never leave the robot mid-command if it drops connection
+      // while someone's actively driving it.
+      driveStopAll();
+      const driveOverlay = document.getElementById('drive-overlay');
+      if (!driveOverlay.classList.contains('hidden')) {
+        driveOverlay.querySelector('#drive-status').classList.remove('online');
+        document.getElementById('drive-status-text').textContent = 'Terputus dari robot — gerakan cuma simulasi';
+      }
     });
 
     robot.onData(raw => {
@@ -2919,6 +2927,218 @@ async function connectBLE() {
 }
 
 bleBtn.addEventListener('click', connectBLE);
+
+/* ── Manual Drive Control ──────────────────────────────────────
+   Full-screen overlay with a draggable joystick (touch/mouse) and
+   WASD/arrow-key support (desktop). Reuses RoboBLE.compileBlocks()
+   for every command sent — so this speaks the EXACT same protocol
+   as the block editor's Run button, no separate command-building
+   logic that could drift out of sync with the firmware.
+
+   Movement model (matches the firmware's actual command shape, per
+   the RoboBLE compiler): FWD/BWD are STATE commands — the robot
+   keeps moving until told otherwise — so these are sent ONCE on
+   press and followed by STP on release. TRL/TRR are a discrete
+   per-call rotation, not continuous-while-held, so turning is
+   simulated with a small nudge (15°) repeated on an interval while
+   held. Holding forward + a turn direction together naturally drives
+   an arc, since the two systems run independently — no special-case
+   code needed for that. */
+const DRIVE_TURN_NUDGE_DEG = 15;
+const DRIVE_TURN_INTERVAL_MS = 180;
+
+let driveSpeed = 60;
+let driveForwardState = null; // null | 'fwd' | 'bwd'
+let driveTurnTimer = null;
+let driveTurnDir = null;      // null | 'left' | 'right'
+
+function driveSendBlock(type, params = {}) {
+  const { commandStr } = RoboBLE.compileBlocks([{ type, params }]);
+  if (bleConnected && robot) {
+    robot.sendCommand(commandStr).catch(err => console.warn('[Drive] send failed:', err.message));
+  } else {
+    console.log('[Drive] (simulasi, robot belum connect) ->', commandStr.trim());
+  }
+}
+
+function driveSetForward(dir) {
+  if (dir === driveForwardState) return;
+  driveForwardState = dir;
+  if (dir === 'fwd') driveSendBlock('move_forward', { speed: driveSpeed });
+  else if (dir === 'bwd') driveSendBlock('move_backward', { speed: driveSpeed });
+  else driveSendBlock('stop');
+}
+
+function driveSetTurn(dir) {
+  if (dir === driveTurnDir) return;
+  driveTurnDir = dir;
+  clearInterval(driveTurnTimer);
+  driveTurnTimer = null;
+  if (dir === 'left') {
+    driveSendBlock('turn_left', { degrees: DRIVE_TURN_NUDGE_DEG });
+    driveTurnTimer = setInterval(() => driveSendBlock('turn_left', { degrees: DRIVE_TURN_NUDGE_DEG }), DRIVE_TURN_INTERVAL_MS);
+  } else if (dir === 'right') {
+    driveSendBlock('turn_right', { degrees: DRIVE_TURN_NUDGE_DEG });
+    driveTurnTimer = setInterval(() => driveSendBlock('turn_right', { degrees: DRIVE_TURN_NUDGE_DEG }), DRIVE_TURN_INTERVAL_MS);
+  }
+}
+
+/* Safety net: called when the overlay closes, the tab loses focus, or
+   the person taps Stop — makes sure the robot can never keep moving
+   with no way for anyone to see/correct it. */
+function driveStopAll() {
+  clearInterval(driveTurnTimer);
+  driveTurnTimer = null;
+  driveTurnDir = null;
+  if (driveForwardState !== null) {
+    driveForwardState = null;
+    driveSendBlock('stop');
+  }
+  document.querySelectorAll('.key-cap.active').forEach(k => k.classList.remove('active'));
+  driveKeysHeld.clear();
+  resetJoystickKnob();
+}
+
+/* ── Keyboard (WASD / Arrow keys) — only listens while the overlay
+   is open (see openDriveOverlay/closeDriveOverlay), so typing
+   elsewhere in the app is never hijacked. */
+const driveKeysHeld = new Set();
+const DRIVE_KEY_MAP = {
+  w: 'ArrowUp', W: 'ArrowUp', ArrowUp: 'ArrowUp',
+  s: 'ArrowDown', S: 'ArrowDown', ArrowDown: 'ArrowDown',
+  a: 'ArrowLeft', A: 'ArrowLeft', ArrowLeft: 'ArrowLeft',
+  d: 'ArrowRight', D: 'ArrowRight', ArrowRight: 'ArrowRight',
+};
+
+function driveRecomputeFromKeys() {
+  const up = driveKeysHeld.has('ArrowUp');
+  const down = driveKeysHeld.has('ArrowDown');
+  const left = driveKeysHeld.has('ArrowLeft');
+  const right = driveKeysHeld.has('ArrowRight');
+  driveSetForward(up ? 'fwd' : down ? 'bwd' : null);
+  driveSetTurn(left ? 'left' : right ? 'right' : null);
+}
+
+function driveKeyDown(e) {
+  const mapped = DRIVE_KEY_MAP[e.key];
+  if (!mapped) return;
+  e.preventDefault();
+  if (!driveKeysHeld.has(mapped)) {
+    driveKeysHeld.add(mapped);
+    document.querySelector(`.key-cap[data-key="${mapped}"]`)?.classList.add('active');
+    driveRecomputeFromKeys();
+  }
+}
+function driveKeyUp(e) {
+  const mapped = DRIVE_KEY_MAP[e.key];
+  if (!mapped) return;
+  driveKeysHeld.delete(mapped);
+  document.querySelector(`.key-cap[data-key="${mapped}"]`)?.classList.remove('active');
+  driveRecomputeFromKeys();
+}
+
+/* ── Joystick (touch/mouse drag) ──────────────────────────────── */
+const JOYSTICK_DEADZONE = 0.25; // fraction of radius before a direction registers
+
+function resetJoystickKnob() {
+  const knob = document.getElementById('joystick-knob');
+  if (knob) knob.style.transform = 'translate(0px, 0px)';
+}
+
+function initJoystick() {
+  const base = document.getElementById('joystick-base');
+  const knob = document.getElementById('joystick-knob');
+  let dragging = false;
+
+  function handleMove(clientX, clientY) {
+    const rect = base.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    const radius = rect.width / 2;
+    const dist = Math.min(Math.hypot(dx, dy), radius);
+    const angle = Math.atan2(dy, dx);
+    const clampedX = Math.cos(angle) * dist;
+    const clampedY = Math.sin(angle) * dist;
+    knob.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+
+    const fracX = clampedX / radius;
+    const fracY = clampedY / radius;
+
+    if (fracY < -JOYSTICK_DEADZONE) driveSetForward('fwd');
+    else if (fracY > JOYSTICK_DEADZONE) driveSetForward('bwd');
+    else driveSetForward(null);
+
+    if (fracX < -JOYSTICK_DEADZONE) driveSetTurn('left');
+    else if (fracX > JOYSTICK_DEADZONE) driveSetTurn('right');
+    else driveSetTurn(null);
+  }
+
+  function release() {
+    dragging = false;
+    resetJoystickKnob();
+    driveSetForward(null);
+    driveSetTurn(null);
+  }
+
+  base.addEventListener('mousedown', e => { dragging = true; handleMove(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e => { if (dragging) handleMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', () => { if (dragging) release(); });
+
+  base.addEventListener('touchstart', e => {
+    dragging = true;
+    const t = e.touches[0];
+    handleMove(t.clientX, t.clientY);
+  }, { passive: true });
+  base.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    handleMove(t.clientX, t.clientY);
+  }, { passive: false });
+  base.addEventListener('touchend', release);
+  base.addEventListener('touchcancel', release);
+}
+initJoystick();
+
+/* ── Overlay open/close + wiring ──────────────────────────────── */
+function openDriveOverlay() {
+  document.getElementById('drive-overlay').classList.remove('hidden');
+  document.getElementById('drive-status').classList.toggle('online', bleConnected);
+  document.getElementById('drive-status-text').textContent = bleConnected
+    ? `Terhubung ke ${robot?.deviceName || 'robot'} — gerakan langsung dikirim`
+    : 'Belum terhubung — gerakan cuma simulasi (lihat console)';
+  document.addEventListener('keydown', driveKeyDown);
+  document.addEventListener('keyup', driveKeyUp);
+}
+function closeDriveOverlay() {
+  document.getElementById('drive-overlay').classList.add('hidden');
+  document.removeEventListener('keydown', driveKeyDown);
+  document.removeEventListener('keyup', driveKeyUp);
+  driveStopAll();
+}
+
+document.getElementById('drive-open-btn').addEventListener('click', openDriveOverlay);
+document.getElementById('drive-close-btn').addEventListener('click', closeDriveOverlay);
+document.getElementById('drive-stop-btn').addEventListener('click', driveStopAll);
+document.getElementById('drive-gripper-open-btn').addEventListener('click', () => driveSendBlock('gripper_open'));
+document.getElementById('drive-gripper-close-btn').addEventListener('click', () => driveSendBlock('gripper_close'));
+
+const driveSpeedSlider = document.getElementById('drive-speed-slider');
+driveSpeedSlider.addEventListener('input', () => {
+  driveSpeed = parseInt(driveSpeedSlider.value, 10);
+  document.getElementById('drive-speed-val').textContent = `${driveSpeed}%`;
+});
+
+// Safety net: stop the robot if the tab loses focus/visibility while
+// driving (switching apps, phone screen lock, etc.) — the person can't
+// see the robot anymore to correct it, so it shouldn't keep going.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && !document.getElementById('drive-overlay').classList.contains('hidden')) {
+    driveStopAll();
+  }
+});
 
 /* ── Run button ─────────────────────────────────────────────── */
 document.getElementById('run-btn').addEventListener('click', async () => {

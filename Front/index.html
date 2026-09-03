@@ -270,6 +270,10 @@
         <button class="tool-btn" id="zoom-out-btn" title="Zoom Out">−</button>
         <div class="tool-divider"></div>
         <button class="tool-btn" id="trash-btn" title="Clear" style="color:var(--accent-red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        <div class="tool-divider"></div>
+        <button class="tool-btn" id="drive-open-btn" title="Kontrol Manual">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><line x1="7" y1="10.5" x2="7" y2="14.5"/><line x1="5" y1="12.5" x2="9" y2="12.5"/><circle cx="15" cy="10.5" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+        </button>
       </div>
 
       <!-- Mobile-only: floating equivalent of the topbar's #ai-toggle-btn
@@ -749,6 +753,64 @@
 
   </div>
 </aside>
+
+<!-- ════════════════════════════════════════════════════
+     MANUAL DRIVE CONTROL — full-screen overlay, joystick for
+     touch devices + WASD/arrow keys for desktop. Sends the exact
+     same command tokens as the block compiler (RoboBLE.compileBlocks)
+     so it's guaranteed compatible with the firmware — no separate
+     protocol to keep in sync.
+══════════════════════════════════════════════════════ -->
+<div id="drive-overlay" class="hidden">
+  <div class="drive-header">
+    <div class="drive-title">Kontrol Manual</div>
+    <button class="btn-icon" id="drive-close-btn" aria-label="Tutup kontrol manual">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="drive-status" id="drive-status">
+    <span class="dot-status" id="drive-status-dot"></span>
+    <span id="drive-status-text">Belum terhubung — gerakan cuma simulasi (lihat console)</span>
+  </div>
+
+  <div class="drive-body">
+    <div class="drive-speed-row">
+      <span class="meta-label">Kecepatan</span>
+      <input type="range" id="drive-speed-slider" min="10" max="100" value="60" step="5" />
+      <span id="drive-speed-val">60%</span>
+    </div>
+
+    <!-- Joystick — draggable with touch or mouse. Vertical = maju/mundur
+         (FWD/BWD, continuous while held), horizontal = belok kiri/kanan
+         (repeated small TRL/TRR nudges while held — see app.js). -->
+    <div class="joystick-wrap">
+      <div class="joystick-base" id="joystick-base">
+        <div class="joystick-knob" id="joystick-knob"></div>
+      </div>
+    </div>
+
+    <!-- Same controls, keyboard version for desktop — highlights the
+         active key(s) so it's clear what's currently being sent. -->
+    <div class="drive-key-hints">
+      <div class="key-hint-row">
+        <div class="key-cap" data-key="ArrowUp">W / ↑</div>
+      </div>
+      <div class="key-hint-row">
+        <div class="key-cap" data-key="ArrowLeft">A / ←</div>
+        <div class="key-cap" data-key="ArrowDown">S / ↓</div>
+        <div class="key-cap" data-key="ArrowRight">D / →</div>
+      </div>
+      <p class="drive-key-note">Keyboard cuma aktif kalau overlay ini terbuka</p>
+    </div>
+
+    <div class="drive-extra-controls">
+      <button class="drive-extra-btn" id="drive-gripper-open-btn">Buka Gripper</button>
+      <button class="drive-extra-btn" id="drive-gripper-close-btn">Tutup Gripper</button>
+      <button class="drive-extra-btn drive-stop-btn" id="drive-stop-btn">■ Stop</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════════════════════════════════════════════════════
      FIRST-RUN TOUR — spotlight overlay walking through the main
