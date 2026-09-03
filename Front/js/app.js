@@ -1838,14 +1838,14 @@ const SENSOR_INFO = {
       <path d="M50 20 Q80 -8 110 20" stroke="#22d3ee" stroke-width="2" fill="none" opacity=".3"/>
     </svg>`,
     pins: [
-      { name: 'VCC',  to: '5V (ESP32)',       note: 'Butuh 5V, bukan 3.3V — kalau papan cuma punya pin 3V3, pakai VIN/5V dari power modul.' },
+      { name: 'VCC',  to: '5V (ESP32)',       note: 'Butuh 5V, bukan 3.3V kalau papan cuma punya pin 3V3, pakai VIN/5V dari power modul.' },
       { name: 'TRIG', to: 'GPIO output (mis. D5)', note: 'Kirim pulsa HIGH 10µs untuk memicu pengiriman gelombang ultrasonik.' },
-      { name: 'ECHO', to: 'GPIO input (mis. D18)', note: 'Sinyal ECHO balik di level 5V — sebaiknya pakai voltage divider (resistor) supaya aman untuk GPIO ESP32 yang 3.3V.' },
+      { name: 'ECHO', to: 'GPIO input (mis. D18)', note: 'Sinyal ECHO balik di level 5V, sebaiknya pakai voltage divider (resistor) supaya aman untuk GPIO ESP32 yang 3.3V.' },
       { name: 'GND',  to: 'GND (common)',     note: 'Harus satu ground dengan ESP32.' },
     ],
     description: `
       <p>Sensor ultrasonik mengukur jarak dengan memancarkan gelombang suara ultrasonik lewat pemancar (kiri), lalu menghitung <strong>waktu tempuh</strong> sampai gelombang itu memantul balik dan ditangkap oleh penerima (kanan).</p>
-      <p>Jarak dihitung dari rumus: <strong>jarak = (waktu × kecepatan suara) / 2</strong> — dibagi 2 karena waktunya menghitung perjalanan pergi-pulang.</p>
+      <p>Jarak dihitung dari rumus: <strong>jarak = (waktu × kecepatan suara) / 2</strong>  dibagi 2 karena waktunya menghitung perjalanan pergi-pulang.</p>
       <p><strong>Kegunaan di robot:</strong> deteksi halangan di depan robot (obstacle avoidance), berhenti otomatis sebelum menabrak, atau mengukur jarak ke suatu objek.</p>
     `,
     example: `
@@ -1865,7 +1865,7 @@ const SENSOR_INFO = {
       <text x="110" y="135" font-size="8" fill="#3b8aff" text-anchor="middle" font-family="monospace">VCC SIGNAL GND</text>
     </svg>`,
     pins: [
-      { name: 'VCC (Merah)',   to: '5V — sebaiknya power terpisah', note: 'Servo menarik arus lumayan besar saat bergerak; kalau ambil langsung dari 5V ESP32, board bisa restart sendiri. Idealnya dari power supply/baterai eksternal (tetap satu GND).' },
+      { name: 'VCC (Merah)',   to: '5V sebaiknya power terpisah', note: 'Servo menarik arus lumayan besar saat bergerak; kalau ambil langsung dari 5V ESP32, board bisa restart sendiri. Idealnya dari power supply/baterai eksternal (tetap satu GND).' },
       { name: 'SIGNAL (Kuning/Oranye)', to: 'GPIO PWM (mis. D13)', note: 'Menerima sinyal PWM yang menentukan sudut servo (biasanya pulsa 1–2ms tiap 20ms).' },
       { name: 'GND (Coklat/Hitam)', to: 'GND (common)', note: 'Wajib satu ground dengan ESP32, meskipun VCC dari sumber terpisah.' },
     ],
@@ -1874,7 +1874,7 @@ const SENSOR_INFO = {
       <p><strong>Kegunaan di robot:</strong> mengambil, menjepit, atau memindahkan objek kecil — bagian penting dari tantangan "pick and place".</p>
     `,
     example: `
-      <p>Blok <code>buka gripper</code> dan <code>tutup gripper</code> masing-masing mengirim posisi sudut yang sudah ditentukan di firmware (lihat <code>main.py</code> pada handler <code>gripper_open</code>/<code>gripper_close</code>).</p>
+      <p>Blok <code>buka gripper</code> dan <code>tutup gripper</code> masing-masing mengirim posisi sudut yang sudah ditentukan di firmware.</p>
       <p>Pola umum: buka gripper → dekati objek pakai motor → tutup gripper → angkat/pindahkan.</p>
     `,
   },
@@ -1897,7 +1897,7 @@ const SENSOR_INFO = {
     description: `
       <p><strong>LED RGB</strong> bisa diatur warnanya (merah, hijau, biru, kombinasi) untuk memberi indikator visual status robot — misalnya hijau saat aman, merah saat mendeteksi halangan.</p>
       <p><strong>Buzzer</strong> menghasilkan bunyi dengan frekuensi tertentu; tiap "nada" (C4, D4, dst.) sebenarnya cuma frekuensi berbeda yang membuat speaker piezo bergetar pada kecepatan itu.</p>
-      <p><strong>Kegunaan di robot:</strong> feedback yang bisa dilihat/didengar manusia — penting untuk debugging dan membuat robot "terasa hidup".</p>
+      <p><strong>Kegunaan di robot:</strong> feedback yang bisa dilihat/didengar manusia.</p>
     `,
     example: `
       <p>Blok <code>set LED all to [green]</code> mengubah warna semua LED sekaligus. Blok <code>play note [C4] for [500]ms</code> membunyikan nada C4 selama setengah detik.</p>
@@ -1921,13 +1921,13 @@ const SENSOR_INFO = {
       { name: 'GND', to: 'GND (common)', note: '—' },
     ],
     description: `
-      <p>Sensor garis memancarkan cahaya inframerah ke permukaan lalu mengukur seberapa banyak yang <strong>dipantulkan kembali</strong>. Permukaan terang (lantai putih) memantulkan lebih banyak cahaya dibanding permukaan gelap (garis hitam) — perbedaan ini yang dibaca sensor.</p>
+      <p>Sensor garis memancarkan cahaya inframerah ke permukaan lalu mengukur seberapa banyak yang <strong>dipantulkan kembali</strong>. Permukaan terang (lantai putih) memantulkan lebih banyak cahaya dibanding permukaan gelap (garis hitam) perbedaan ini yang dibaca sensor.</p>
       <p>Karena sensornya berupa array (baris beberapa titik), robot bisa tahu apakah garis ada di tengah, geser ke kiri, atau ke kanan dari posisinya sekarang.</p>
-      <p><strong>Kegunaan di robot:</strong> line-following — robot mengikuti jalur garis di lantai secara otomatis, dasar untuk banyak kompetisi robotika.</p>
+      <p><strong>Kegunaan di robot:</strong> line-following robot mengikuti jalur garis di lantai secara otomatis, dasar untuk banyak kompetisi robotika.</p>
     `,
     example: `
       <p>Blok <code>baca sensor garis</code> mengembalikan posisi garis relatif ke robot. Blok <code>ikuti garis selama [3] detik</code> menjalankan logika following otomatis selama durasi yang ditentukan.</p>
-      <p>Robot akan otomatis berhenti/menyesuaikan arah kalau kehilangan garis (lihat pengaman di <code>main.py</code>).</p>
+      <p>Robot akan otomatis berhenti/menyesuaikan arah kalau kehilangan garis.</p>
     `,
   },
 };
