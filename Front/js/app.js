@@ -1840,12 +1840,12 @@ const SENSOR_INFO = {
     pins: [
       { name: 'VCC',  to: '5V (ESP32)',       note: 'Butuh 5V, bukan 3.3V kalau papan cuma punya pin 3V3, pakai VIN/5V dari power modul.' },
       { name: 'TRIG', to: 'GPIO output (mis. D5)', note: 'Kirim pulsa HIGH 10µs untuk memicu pengiriman gelombang ultrasonik.' },
-      { name: 'ECHO', to: 'GPIO input (mis. D18)', note: 'Sinyal ECHO balik di level 5V, sebaiknya pakai voltage divider (resistor) supaya aman untuk GPIO ESP32 yang 3.3V.' },
+      { name: 'ECHO', to: 'GPIO input (mis. D18)', note: 'Sinyal ECHO balik di level 5V sebaiknya pakai voltage divider (resistor) supaya aman untuk GPIO ESP32 yang 3.3V.' },
       { name: 'GND',  to: 'GND (common)',     note: 'Harus satu ground dengan ESP32.' },
     ],
     description: `
       <p>Sensor ultrasonik mengukur jarak dengan memancarkan gelombang suara ultrasonik lewat pemancar (kiri), lalu menghitung <strong>waktu tempuh</strong> sampai gelombang itu memantul balik dan ditangkap oleh penerima (kanan).</p>
-      <p>Jarak dihitung dari rumus: <strong>jarak = (waktu × kecepatan suara) / 2</strong>  dibagi 2 karena waktunya menghitung perjalanan pergi-pulang.</p>
+      <p>Jarak dihitung dari rumus: <strong>jarak = (waktu × kecepatan suara) / 2</strong> — dibagi 2 karena waktunya menghitung perjalanan pergi-pulang.</p>
       <p><strong>Kegunaan di robot:</strong> deteksi halangan di depan robot (obstacle avoidance), berhenti otomatis sebelum menabrak, atau mengukur jarak ke suatu objek.</p>
     `,
     example: `
@@ -1865,13 +1865,13 @@ const SENSOR_INFO = {
       <text x="110" y="135" font-size="8" fill="#3b8aff" text-anchor="middle" font-family="monospace">VCC SIGNAL GND</text>
     </svg>`,
     pins: [
-      { name: 'VCC (Merah)',   to: '5V sebaiknya power terpisah', note: 'Servo menarik arus lumayan besar saat bergerak; kalau ambil langsung dari 5V ESP32, board bisa restart sendiri. Idealnya dari power supply/baterai eksternal (tetap satu GND).' },
+      { name: 'VCC (Merah)',   to: '5V  sebaiknya power terpisah', note: 'Servo menarik arus lumayan besar saat bergerak; kalau ambil langsung dari 5V ESP32, board bisa restart sendiri. Idealnya dari power supply/baterai eksternal (tetap satu GND).' },
       { name: 'SIGNAL (Kuning/Oranye)', to: 'GPIO PWM (mis. D13)', note: 'Menerima sinyal PWM yang menentukan sudut servo (biasanya pulsa 1–2ms tiap 20ms).' },
       { name: 'GND (Coklat/Hitam)', to: 'GND (common)', note: 'Wajib satu ground dengan ESP32, meskipun VCC dari sumber terpisah.' },
     ],
     description: `
       <p>Servo motor mengubah sinyal PWM (lebar pulsa) menjadi <strong>posisi sudut</strong> yang presisi (biasanya 0°–180°). Gripper memakai satu servo yang digerakkan ke dua posisi sudut: satu untuk "terbuka", satu untuk "tertutup".</p>
-      <p><strong>Kegunaan di robot:</strong> mengambil, menjepit, atau memindahkan objek kecil — bagian penting dari tantangan "pick and place".</p>
+      <p><strong>Kegunaan di robot:</strong> mengambil, menjepit, atau memindahkan objek kecil bagian penting dari tantangan "pick and place".</p>
     `,
     example: `
       <p>Blok <code>buka gripper</code> dan <code>tutup gripper</code> masing-masing mengirim posisi sudut yang sudah ditentukan di firmware.</p>
@@ -1897,7 +1897,7 @@ const SENSOR_INFO = {
     description: `
       <p><strong>LED RGB</strong> bisa diatur warnanya (merah, hijau, biru, kombinasi) untuk memberi indikator visual status robot — misalnya hijau saat aman, merah saat mendeteksi halangan.</p>
       <p><strong>Buzzer</strong> menghasilkan bunyi dengan frekuensi tertentu; tiap "nada" (C4, D4, dst.) sebenarnya cuma frekuensi berbeda yang membuat speaker piezo bergetar pada kecepatan itu.</p>
-      <p><strong>Kegunaan di robot:</strong> feedback yang bisa dilihat/didengar manusia.</p>
+      <p><strong>Kegunaan di robot:</strong> feedback yang bisa dilihat/didengar manusia penting untuk debugging dan membuat robot "terasa hidup".</p>
     `,
     example: `
       <p>Blok <code>set LED all to [green]</code> mengubah warna semua LED sekaligus. Blok <code>play note [C4] for [500]ms</code> membunyikan nada C4 selama setengah detik.</p>
@@ -1927,7 +1927,7 @@ const SENSOR_INFO = {
     `,
     example: `
       <p>Blok <code>baca sensor garis</code> mengembalikan posisi garis relatif ke robot. Blok <code>ikuti garis selama [3] detik</code> menjalankan logika following otomatis selama durasi yang ditentukan.</p>
-      <p>Robot akan otomatis berhenti/menyesuaikan arah kalau kehilangan garis.</p>
+      <p>Robot akan otomatis berhenti/menyesuaikan arah kalau kehilangan garis (lihat pengaman di <code>main.py</code>).</p>
     `,
   },
 };
@@ -2929,7 +2929,7 @@ async function connectBLE() {
 bleBtn.addEventListener('click', connectBLE);
 
 /* ── Manual Drive Control ──────────────────────────────────────
-   Full-screen overlay with a draggable joystick (touch/mouse) and
+   Full-screen overlay with a D-pad (press-and-hold buttons) and
    WASD/arrow-key support (desktop). Reuses RoboBLE.compileBlocks()
    for every command sent — so this speaks the EXACT same protocol
    as the block editor's Run button, no separate command-building
@@ -2996,7 +2996,7 @@ function driveStopAll() {
   }
   document.querySelectorAll('.key-cap.active').forEach(k => k.classList.remove('active'));
   driveKeysHeld.clear();
-  resetJoystickKnob();
+  resetDpadButtons();
 }
 
 /* ── Keyboard (WASD / Arrow keys) — only listens while the overlay
@@ -3037,70 +3037,53 @@ function driveKeyUp(e) {
   driveRecomputeFromKeys();
 }
 
-/* ── Joystick (touch/mouse drag) ──────────────────────────────── */
-const JOYSTICK_DEADZONE = 0.25; // fraction of radius before a direction registers
-
-function resetJoystickKnob() {
-  const knob = document.getElementById('joystick-knob');
-  if (knob) knob.style.transform = 'translate(0px, 0px)';
+/* ── D-pad (press-and-hold buttons) ───────────────────────────────
+   Each button maps straight to the same driveSetForward/driveSetTurn
+   functions the keyboard uses — press = engage that direction,
+   release = disengage. Holding two adjacent buttons (e.g. Up + Left)
+   works too, same as keyboard, since the two axes are independent. */
+function resetDpadButtons() {
+  document.querySelectorAll('.dpad-btn.active').forEach(b => b.classList.remove('active'));
 }
 
-function initJoystick() {
-  const base = document.getElementById('joystick-base');
-  const knob = document.getElementById('joystick-knob');
-  let dragging = false;
+function initDpad() {
+  const DIR_ACTION = {
+    up:    () => driveSetForward('fwd'),
+    down:  () => driveSetForward('bwd'),
+    left:  () => driveSetTurn('left'),
+    right: () => driveSetTurn('right'),
+  };
+  const DIR_RELEASE_AXIS = {
+    up: () => driveSetForward(null), down: () => driveSetForward(null),
+    left: () => driveSetTurn(null), right: () => driveSetTurn(null),
+  };
 
-  function handleMove(clientX, clientY) {
-    const rect = base.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = clientX - cx;
-    const dy = clientY - cy;
-    const radius = rect.width / 2;
-    const dist = Math.min(Math.hypot(dx, dy), radius);
-    const angle = Math.atan2(dy, dx);
-    const clampedX = Math.cos(angle) * dist;
-    const clampedY = Math.sin(angle) * dist;
-    knob.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    const dir = btn.dataset.dir;
+    let pressed = false;
 
-    const fracX = clampedX / radius;
-    const fracY = clampedY / radius;
+    function press() {
+      if (pressed) return;
+      pressed = true;
+      btn.classList.add('active');
+      DIR_ACTION[dir]();
+    }
+    function release() {
+      if (!pressed) return;
+      pressed = false;
+      btn.classList.remove('active');
+      DIR_RELEASE_AXIS[dir]();
+    }
 
-    if (fracY < -JOYSTICK_DEADZONE) driveSetForward('fwd');
-    else if (fracY > JOYSTICK_DEADZONE) driveSetForward('bwd');
-    else driveSetForward(null);
-
-    if (fracX < -JOYSTICK_DEADZONE) driveSetTurn('left');
-    else if (fracX > JOYSTICK_DEADZONE) driveSetTurn('right');
-    else driveSetTurn(null);
-  }
-
-  function release() {
-    dragging = false;
-    resetJoystickKnob();
-    driveSetForward(null);
-    driveSetTurn(null);
-  }
-
-  base.addEventListener('mousedown', e => { dragging = true; handleMove(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', e => { if (dragging) handleMove(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', () => { if (dragging) release(); });
-
-  base.addEventListener('touchstart', e => {
-    dragging = true;
-    const t = e.touches[0];
-    handleMove(t.clientX, t.clientY);
-  }, { passive: true });
-  base.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    e.preventDefault();
-    const t = e.touches[0];
-    handleMove(t.clientX, t.clientY);
-  }, { passive: false });
-  base.addEventListener('touchend', release);
-  base.addEventListener('touchcancel', release);
+    btn.addEventListener('mousedown', press);
+    btn.addEventListener('mouseup', release);
+    btn.addEventListener('mouseleave', release); // dragged off the button while held
+    btn.addEventListener('touchstart', e => { e.preventDefault(); press(); }, { passive: false });
+    btn.addEventListener('touchend', release);
+    btn.addEventListener('touchcancel', release);
+  });
 }
-initJoystick();
+initDpad();
 
 /* ── Overlay open/close + wiring ──────────────────────────────── */
 function openDriveOverlay() {

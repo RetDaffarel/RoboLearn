@@ -1993,27 +1993,42 @@ html, body {
 .drive-speed-row input[type="range"] { flex: 1; }
 #drive-speed-val { font-size: 12px; font-weight: 600; color: var(--accent-orange); min-width: 36px; text-align: right; }
 
-/* Joystick — a circular base the knob is dragged within, clamped to
-   the base's radius. Positioning of the knob itself is done via JS
-   (transform: translate), this just styles the two static circles. */
-.joystick-wrap { display: flex; justify-content: center; }
-.joystick-base {
-  position: relative;
-  width: 200px; height: 200px;
-  border-radius: 50%;
+/* D-pad — 3x3 grid, directional buttons in the cross positions,
+   center left empty. Each button is a discrete press-and-hold
+   control (not a free-drag stick), matching the discrete nature of
+   the movement commands (FWD/BWD/TRL/TRR). */
+.dpad {
+  display: grid;
+  grid-template-columns: 64px 64px 64px;
+  grid-template-rows: 64px 64px 64px;
+  gap: 6px;
+}
+.dpad-up    { grid-column: 2; grid-row: 1; }
+.dpad-left  { grid-column: 1; grid-row: 2; }
+.dpad-center{ grid-column: 2; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down  { grid-column: 2; grid-row: 3; }
+
+.dpad-btn {
+  display: flex; align-items: center; justify-content: center;
   background: var(--bg-card);
-  border: 2px solid var(--border-md);
+  border: 1.5px solid var(--border-md);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
   touch-action: none;
+  user-select: none;
+  transition: background .08s, border-color .08s, color .08s, transform .08s;
 }
-.joystick-knob {
-  position: absolute; top: 50%; left: 50%;
-  width: 76px; height: 76px;
-  margin: -38px 0 0 -38px;
-  border-radius: 50%;
-  background: var(--accent-orange);
-  box-shadow: 0 4px 16px rgba(255,107,43,.4);
-  transition: transform .05s linear;
+.dpad-btn svg { width: 26px; height: 26px; }
+.dpad-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.dpad-btn.active {
+  background: rgba(255,107,43,.18);
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+  transform: scale(.94);
 }
+.dpad-center { background: transparent; }
 
 .drive-key-hints { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .key-hint-row { display: flex; gap: 8px; }
@@ -2056,6 +2071,6 @@ html, body {
 }
 
 @media (max-width: 480px) {
-  .joystick-base { width: 170px; height: 170px; }
-  .joystick-knob { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+  .dpad { grid-template-columns: 56px 56px 56px; grid-template-rows: 56px 56px 56px; }
+  .dpad-btn svg { width: 22px; height: 22px; }
 }

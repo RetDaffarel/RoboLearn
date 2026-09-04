@@ -755,7 +755,7 @@
 </aside>
 
 <!-- ════════════════════════════════════════════════════
-     MANUAL DRIVE CONTROL — full-screen overlay, joystick for
+     MANUAL DRIVE CONTROL — full-screen overlay, D-pad for
      touch devices + WASD/arrow keys for desktop. Sends the exact
      same command tokens as the block compiler (RoboBLE.compileBlocks)
      so it's guaranteed compatible with the firmware — no separate
@@ -781,13 +781,26 @@
       <span id="drive-speed-val">60%</span>
     </div>
 
-    <!-- Joystick — draggable with touch or mouse. Vertical = maju/mundur
-         (FWD/BWD, continuous while held), horizontal = belok kiri/kanan
-         (repeated small TRL/TRR nudges while held — see app.js). -->
-    <div class="joystick-wrap">
-      <div class="joystick-base" id="joystick-base">
-        <div class="joystick-knob" id="joystick-knob"></div>
-      </div>
+    <!-- D-pad — press-and-hold buttons instead of a free-drag analog
+         stick, so movement is constrained to 4 clear directions. Up/Down
+         = maju/mundur (FWD/BWD, continuous while held), Left/Right =
+         belok kiri/kanan (repeated small TRL/TRR nudges while held —
+         see app.js). Holding two adjacent buttons (e.g. Up + Left)
+         works too — an arcing turn, same as keyboard. -->
+    <div class="dpad">
+      <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Maju">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>
+      </button>
+      <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Belok kiri">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></svg>
+      </button>
+      <div class="dpad-center"></div>
+      <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Belok kanan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+      </button>
+      <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Mundur">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
     </div>
 
     <!-- Same controls, keyboard version for desktop — highlights the
